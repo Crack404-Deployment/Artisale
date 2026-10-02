@@ -1,19 +1,14 @@
-// app/page.tsx
+// app/marketplace/page.tsx
 "use client";
 
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { HeroSlider } from "@/components/HeroSlider";
-import { HomeCatalog } from "@/components/HomeCatalog";
-import { BrandValues } from "@/components/BrandValues";
-import { VendorSpotlight } from "@/components/VendorSpotlight";
-import { Newsletter } from "@/components/Newsletter";
+import { Marketplace } from "@/components/Marketplace";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
-import { mockProducts } from "@/data/marketplaceData";
 import { CartItem, Product } from "@/types/marketplace";
 
-export default function Home() {
+export default function MarketplacePage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -33,6 +28,7 @@ export default function Home() {
     setCart((prev) => prev.filter((item) => item.product.id !== id));
   };
 
+  // Add quantity update handler
   const handleUpdateQuantity = (id: string, newQuantity: number) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -46,11 +42,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-eerie-1 text-white">
       <Header cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} />
-      <HeroSlider />
-      <BrandValues />
-      <HomeCatalog products={mockProducts} onAddToCart={handleAddToCart} />
-      <VendorSpotlight />
-      <Newsletter />
+      <Marketplace onAddToCart={handleAddToCart} />
       <Footer />
       <CartDrawer
         isOpen={isCartOpen}
