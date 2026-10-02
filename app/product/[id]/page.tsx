@@ -28,6 +28,7 @@ export default function ProductPage() {
         onClose={() => setIsCartOpen(false)}
         items={cart}
         onRemove={handleRemoveFromCart}
+        onUpdateQuantity={(id, newQuantity) => console.log("Update", id, newQuantity)}
       />
     </main>
   );
