@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { HeroSlider } from "@/components/HeroSlider";
 import { HomeCatalog } from "@/components/HomeCatalog";
 import { BrandValues } from "@/components/BrandValues";
+import { BrandName } from "@/components/BrandName";
 import { VendorSpotlight } from "@/components/VendorSpotlight";
 import { Newsletter } from "@/components/Newsletter";
 import { Footer } from "@/components/Footer";
@@ -48,7 +49,8 @@ export default function Home() {
       <Header cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} />
       <HeroSlider />
       <BrandValues />
-      <HomeCatalog products={mockProducts} onAddToCart={handleAddToCart} />
+      <HomeCatalog />
+      <BrandName />
       <VendorSpotlight />
       <Newsletter />
       <Footer />

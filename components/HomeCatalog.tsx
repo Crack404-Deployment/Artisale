@@ -1,201 +1,135 @@
 // components/HomeCatalog.tsx
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ShoppingBag, Star, CheckCircle, X } from "lucide-react";
-import { Product } from "@/types/marketplace";
+import { motion } from "framer-motion";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
-import { LuxuryButton } from "./ui/LuxuryButton";
 
 interface HomeCatalogProps {
-  products: Product[];
-  onAddToCart: (product: Product) => void;
+  products?: any[];
+  onAddToCart?: (product: any) => void;
 }
 
-export const HomeCatalog = ({ products, onAddToCart }: HomeCatalogProps) => {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+const catalogs = [
+  {
+    name: "Men's Clothing",
+    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800",
+    items: ["Shirts", "T-Shirts", "Pants", "Suits & Blazers", "Outerwear"],
+  },
+  {
+    name: "Women's Clothing",
+    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800",
+    items: ["Dresses", "Tops & Blouses", "Pants & Denim", "Skirts", "Outerwear"],
+  },
+  {
+    name: "Baby & Kids",
+    image: "https://images.unsplash.com/photo-1519241047957-be31d7379a5d?q=80&w=800",
+    items: ["Clothing Sets", "Tops & Bodysuits", "Bottoms"],
+  },
+  {
+    name: "Bags",
+    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?q=80&w=800",
+    items: ["Handbags & Totes", "Backpacks", "Travel & Luggage", "Clutches & Wallets"],
+  },
+  {
+    name: "Accessories",
+    image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800",
+    items: ["Timepieces & Watches", "Fine Jewelry", "Sunglasses", "Belts & Leather"],
+  },
+  {
+    name: "Shoes",
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800",
+    items: ["Sneakers", "Formal Shoes", "Heels & Pumps", "Boots"],
+  },
+];
 
+export const HomeCatalog = ({}: HomeCatalogProps) => {
   return (
-    <section id="catalog" className="py-20 bg-eerie-1">
+    <section id="catalog" className="py-24 bg-eerie-1 overflow-hidden">
       <div className="container mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: "-50px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <span className="text-xs font-bold uppercase tracking-[4px] text-gold-crayola">
-            Curated Collection
+            Our Offerings
           </span>
           <div className="my-2 flex items-center justify-center space-x-3">
             <DiamondSeparator />
-            <h2 className="font-forum text-4xl text-white md:text-5xl">Featured Products</h2>
+            <h2 className="font-forum text-4xl text-white md:text-5xl">Explore Categories</h2>
             <DiamondSeparator />
           </div>
           <p className="text-sm text-quicksilver max-w-lg mx-auto">
-            Discover authenticated timepieces, jewelry, and leather goods directly from master craftspeople.
+            Discover our curated selection of premium handcrafted goods and authentic luxury items.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Product Grid */}
-        {products.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-white/10 rounded-sm">
-            <p className="text-sm text-quicksilver">No luxury items currently available.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="group relative flex flex-col border border-white/10 bg-smoky-3 p-4 transition-all duration-300 hover:border-gold-crayola/50 hover:shadow-2xl"
-              >
-                {/* Product Image Box */}
-                <div className="relative aspect-square w-full overflow-hidden bg-eerie-4">
-                  {product.tag && (
-                    <span className="absolute top-3 left-3 z-10 bg-gold-crayola px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-eerie-1">
-                      {product.tag}
-                    </span>
-                  )}
-
+        {/* 2-Column Grid with 3D Perspective & Scroll Reveal */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+          {catalogs.map((catalog, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false, margin: "-10%" }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.23, 1, 0.32, 1],
+                delay: (index % 2) * 0.1 // Slight stagger for the right column
+              }}
+              className="group relative h-[350px] sm:h-[400px] w-full [perspective:2000px] cursor-default"
+            >
+              {/* Inner wrapper that performs the actual rotation */}
+              <div className="relative h-full w-full transition-all duration-[800ms] ease-[cubic-bezier(0.23,1,0.32,1)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] shadow-2xl">
+                
+                {/* 1. FRONT OF CARD (Image Only) */}
+                <div className="absolute inset-0 h-full w-full [backface-visibility:hidden] overflow-hidden rounded-sm bg-eerie-2">
                   <Image
-                    src={product.image}
-                    alt={product.title}
+                    src={catalog.image}
+                    alt={catalog.name}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
-
-                  {/* Single ADD Button Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-eerie-1/90 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <button
-                      onClick={() => onAddToCart(product)}
-                      className="flex w-full items-center justify-center space-x-2 border border-gold-crayola bg-eerie-1/90 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-crayola transition-all hover:bg-gold-crayola hover:text-eerie-1"
-                    >
-                      <ShoppingBag className="h-4 w-4" />
-                      <span>ADD</span>
-                    </button>
-                  </div>
+                  {/* Subtle dark gradient overlay to keep it feeling luxurious */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
                 </div>
 
-                {/* Card Details */}
-                <div className="mt-4 flex flex-1 flex-col justify-between">
-                  <div>
-                    {/* Vendor Badge */}
-                    <div className="flex items-center justify-between text-xs text-quicksilver mb-2">
-                      <div className="flex items-center space-x-1.5">
-                        <span className="font-semibold text-white">{product.vendor.name}</span>
-                        {product.vendor.verified && (
-                          <CheckCircle className="h-3.5 w-3.5 text-gold-crayola" />
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-1 text-amber-400">
-                        <Star className="h-3 w-3 fill-current" />
-                        <span className="text-[11px] font-bold text-white">{product.vendor.rating}</span>
-                      </div>
-                    </div>
+                {/* 2. BACK OF CARD (Text & Bullets) */}
+                {/* [transform:rotateY(180deg)] starts it flipped away from the user */}
+                <div className="absolute inset-0 h-full w-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-sm bg-eerie-2 border border-gold-crayola/40 p-8 flex flex-col items-center justify-center">
+                  
+                  {/* Decorative corner accents for luxury feel */}
+                  <div className="absolute top-4 left-4 w-6 h-6 border-t border-l border-gold-crayola/50" />
+                  <div className="absolute top-4 right-4 w-6 h-6 border-t border-r border-gold-crayola/50" />
+                  <div className="absolute bottom-4 left-4 w-6 h-6 border-b border-l border-gold-crayola/50" />
+                  <div className="absolute bottom-4 right-4 w-6 h-6 border-b border-r border-gold-crayola/50" />
 
-                    {/* Clickable Product Name */}
-                    <h3
-                      onClick={() => setSelectedProduct(product)}
-                      className="font-forum text-xl text-white transition-colors hover:text-gold-crayola cursor-pointer line-clamp-2"
-                      title="Click to view details"
-                    >
-                      {product.title}
-                    </h3>
-
-                    <p className="mt-2 text-xs text-quicksilver line-clamp-2 leading-relaxed">
-                      {product.description}
-                    </p>
-                  </div>
-
-                  {/* Price */}
-                  <div className="mt-4 flex items-baseline space-x-3 border-t border-white/5 pt-3">
-                    <span className="font-forum text-2xl font-bold text-gold-crayola">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-xs text-quicksilver line-through">
-                        ${product.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
+                  {/* Category Title */}
+                  <h3 className="text-3xl md:text-4xl font-forum text-white mb-8 relative tracking-wide text-center">
+                    {catalog.name}
+                    <span className="absolute -bottom-4 left-1/2 w-16 h-[2px] bg-gold-crayola -translate-x-1/2"></span>
+                  </h3>
+                  
+                  {/* Bulleted Products List */}
+                  <ul className="space-y-3 mt-4 text-sm md:text-base text-quicksilver">
+                    {catalog.items.map((item, idx) => (
+                      <li key={idx} className="flex items-center space-x-2">
+                        <span className="text-gold-crayola text-lg leading-none">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Browse All Products CTA */}
-        <div className="mt-14 flex justify-center">
-          <Link href="/marketplace">
-            <LuxuryButton variant="primary">
-              Browse All Products
-            </LuxuryButton>
-          </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
-
-      {/* Product Details Modal */}
-      {selectedProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl border border-gold-crayola/40 bg-eerie-1 p-6 md:p-8 rounded-sm shadow-2xl">
-            <button
-              onClick={() => setSelectedProduct(null)}
-              className="absolute right-4 top-4 text-quicksilver hover:text-white"
-            >
-              <X className="h-6 w-6" />
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative aspect-square w-full overflow-hidden border border-white/10">
-                <Image
-                  src={selectedProduct.image}
-                  alt={selectedProduct.title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              <div className="flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-gold-crayola">
-                    {selectedProduct.category}
-                  </span>
-                  <h2 className="font-forum text-3xl text-white mt-1">{selectedProduct.title}</h2>
-                  
-                  <div className="my-3 flex items-center space-x-2 text-xs text-quicksilver">
-                    <span>Crafted by {selectedProduct.vendor.name}</span>
-                    <CheckCircle className="h-3.5 w-3.5 text-gold-crayola" />
-                  </div>
-
-                  <p className="text-xs text-quicksilver leading-relaxed my-4">
-                    {selectedProduct.description}
-                  </p>
-
-                  <div className="flex items-baseline space-x-3 mb-6">
-                    <span className="font-forum text-3xl font-bold text-gold-crayola">
-                      ${selectedProduct.price.toFixed(2)}
-                    </span>
-                    {selectedProduct.originalPrice && (
-                      <span className="text-sm text-quicksilver line-through">
-                        ${selectedProduct.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <LuxuryButton
-                  onClick={() => {
-                    onAddToCart(selectedProduct);
-                    setSelectedProduct(null);
-                  }}
-                  variant="primary"
-                  className="w-full"
-                >
-                  Add To Cart
-                </LuxuryButton>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 };

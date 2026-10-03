@@ -1,9 +1,9 @@
-// components/Marketplace.tsx
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   ChevronDown,
@@ -38,24 +38,27 @@ const CATEGORY_TREE: CategoryStructure[] = [
     subcategories: ["Dresses", "Tops & Blouses", "Pants & Denim", "Skirts", "Outerwear"],
   },
   {
-    name: "Baby & Kids",
-    subcategories: ["Clothing Sets", "Tops & Bodysuits", "Bottoms"],
-  },
-  {
-    name: "Accessories",
-    subcategories: ["Timepieces & Watches", "Fine Jewelry", "Sunglasses", "Belts & Leather"],
+    name: "Shoes",
+    subcategories: ["Sneakers", "Formal Shoes", "Heels & Pumps", "Boots"],
   },
   {
     name: "Bags",
     subcategories: ["Handbags & Totes", "Backpacks", "Travel & Luggage", "Clutches & Wallets"],
   },
   {
+    name: "Accessories",
+    subcategories: ["Timepieces & Watches", "Fine Jewelry", "Sunglasses", "Belts & Leather"],
+  },
+  {
     name: "Personal Care",
     subcategories: ["Perfumes & Fragrances", "Face Care", "Hair Care", "Body Lotions & Oils"],
   },
+  {
+    name: "Baby & Kids",
+    subcategories: ["Clothing Sets", "Tops & Bodysuits", "Bottoms"],
+  },
 ];
 
-// Helper to generate a diverse set of mock products across all categories
 const generateMockProducts = (): Product[] => {
   const vendors = [
     { name: "Solaris Fine Jewels", rating: 5.0, verified: true },
@@ -66,7 +69,6 @@ const generateMockProducts = (): Product[] => {
     { name: "Maison De Cuir", rating: 4.8, verified: true },
   ];
 
-  // 1. Simplified Product Names
   const productTemplates: Record<string, string[]> = {
     "Shirts": ["Oxford Shirt", "Dress Shirt", "Linen Shirt", "Cotton Shirt"],
     "T-Shirts": ["Basic Tee", "Graphic T-Shirt", "Boxy Tee", "Cashmere T-Shirt"],
@@ -77,9 +79,10 @@ const generateMockProducts = (): Product[] => {
     "Tops & Blouses": ["Ruffle Blouse", "Camisole", "Peplum Top", "Silk Button-Up"],
     "Pants & Denim": ["Wide Leg Jeans", "Leather Leggings", "Flared Pants", "Straight Jeans"],
     "Skirts": ["Midi Skirt", "Mini Skirt", "Slip Skirt", "Denim Skirt"],
-    "Clothing Sets": ["Play Set", "Knit Set", "Suit Set", "Pajamas"],
-    "Tops & Bodysuits": ["Cotton Bodysuit", "Long-Sleeve Top", "Baby Top", "Graphic Tee"],
-    "Bottoms": ["Kids Chinos", "Overalls", "Leggings", "Bloomers"],
+    "Sneakers": ["Designer Sneakers", "High-Top Sneakers", "Slip-On Sneakers", "Leather Trainers"],
+    "Formal Shoes": ["Oxford Shoes", "Derby Shoes", "Monk Strap", "Loafers"],
+    "Heels & Pumps": ["Stiletto Heels", "Block Pumps", "Slingback Heels", "Wedge Sandals"],
+    "Boots": ["Chelsea Boots", "Ankle Boots", "Knee-High Boots", "Desert Boots"],
     "Timepieces & Watches": ["Gold Watch", "Quartz Watch", "Aviator Watch", "Automatic Watch"],
     "Fine Jewelry": ["Diamond Ring", "Gold Necklace", "Pearl Earrings", "Sapphire Ring"],
     "Sunglasses": ["Aviator Sunglasses", "Cat-Eye Sunglasses", "Wayfarer Shades", "Vintage Glasses"],
@@ -92,9 +95,11 @@ const generateMockProducts = (): Product[] => {
     "Face Care": ["Face Serum", "Night Cream", "Face Scrub", "Radiance Oil"],
     "Hair Care": ["Hair Mask", "Shampoo", "Conditioner", "Hair Serum"],
     "Body Lotions & Oils": ["Body Lotion", "Body Oil", "Body Butter", "Massage Oil"],
+    "Clothing Sets": ["Play Set", "Knit Set", "Suit Set", "Pajamas"],
+    "Tops & Bodysuits": ["Cotton Bodysuit", "Long-Sleeve Top", "Baby Top", "Graphic Tee"],
+    "Bottoms": ["Kids Chinos", "Overalls", "Leggings", "Bloomers"],
   };
 
-  // 2. Specific Images perfectly matched to the categories
   const imageMap: Record<string, string> = {
     "Shirts": "https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?auto=format&fit=crop&q=80&w=600",
     "T-Shirts": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600",
@@ -105,9 +110,10 @@ const generateMockProducts = (): Product[] => {
     "Tops & Blouses": "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&q=80&w=600",
     "Pants & Denim": "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=600",
     "Skirts": "https://images.unsplash.com/photo-1583496924845-dbb0d024fc8b?auto=format&fit=crop&q=80&w=600",
-    "Clothing Sets": "https://images.unsplash.com/photo-1519241047957-be31d7379a5d?auto=format&fit=crop&q=80&w=600",
-    "Tops & Bodysuits": "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=600",
-    "Bottoms": "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&q=80&w=600",
+    "Sneakers": "https://images.unsplash.com/photo-1552346154-21d32810baa3?auto=format&fit=crop&q=80&w=600",
+    "Formal Shoes": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600",
+    "Heels & Pumps": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=600",
+    "Boots": "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?auto=format&fit=crop&q=80&w=600",
     "Timepieces & Watches": "https://images.unsplash.com/photo-1524592094714-0f0654ece975?auto=format&fit=crop&q=80&w=600",
     "Fine Jewelry": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=600",
     "Sunglasses": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=600",
@@ -120,6 +126,9 @@ const generateMockProducts = (): Product[] => {
     "Face Care": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600",
     "Hair Care": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&q=80&w=600",
     "Body Lotions & Oils": "https://images.unsplash.com/photo-1608248593842-8021c62ce870?auto=format&fit=crop&q=80&w=600",
+    "Clothing Sets": "https://images.unsplash.com/photo-1519241047957-be31d7379a5d?auto=format&fit=crop&q=80&w=600",
+    "Tops & Bodysuits": "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=600",
+    "Bottoms": "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&q=80&w=600",
   };
 
   const items: Product[] = [];
@@ -132,7 +141,6 @@ const generateMockProducts = (): Product[] => {
       
       templates.forEach((template) => {
         for (let i = 1; i <= 2; i++) {
-          // Hydration safe predictable randomizer
           const price = ((idCount * 137) % 800) + 120;
           const originalPrice = price + ((idCount * 43) % 200) + 50;
 
@@ -144,7 +152,7 @@ const generateMockProducts = (): Product[] => {
             category: cat.name,
             subcategory: sub,
             description: `A beautiful ${sub.toLowerCase()} piece. Premium materials designed for elegance and longevity.`,
-            image: imageUrl, // Uses the matched image!
+            image: imageUrl,
             tag: i % 4 === 0 ? "New Arrival" : i % 7 === 0 ? "Limited" : undefined,
             vendor: vendors[idCount % vendors.length],
           } as any);
@@ -160,40 +168,35 @@ const generateMockProducts = (): Product[] => {
 const STATIC_PRODUCTS = generateMockProducts();
 const ITEMS_PER_PAGE = 50;
 
-export const Marketplace = ({
-  products = STATIC_PRODUCTS,
-  onAddToCart,
-}: MarketplaceProps) => {
-  // Automatically fall back to STATIC_PRODUCTS if incoming products prop has 4 or fewer items
+// Inner component logic requiring useSearchParams
+const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
+  const searchParams = useSearchParams();
+  const urlCategory = searchParams.get("category");
+
   const effectiveProducts =
     products && products.length > 4 ? products : STATIC_PRODUCTS;
 
-  // Filtering & Pagination States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+ const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>(urlCategory || "All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
-  const [expandedCategory, setExpandedCategory] = useState<string | null>("Men's Clothing");
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(urlCategory || null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Accordion Toggle Handler
   const toggleAccordion = (catName: string) => {
     setExpandedCategory((prev) => (prev === catName ? null : catName));
   };
 
-  // Category & Subcategory Handler
   const handleCategorySelect = (category: string, subcategory: string = "All") => {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1); 
   };
 
-  // Filter products based on search query, category, and subcategory
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return effectiveProducts.filter((product: any) => {
-      // Matches search term against title, description, category, and subcategory
       const matchesSearch =
         query === "" ||
         product.title.toLowerCase().includes(query) ||
@@ -201,12 +204,10 @@ export const Marketplace = ({
         product.category.toLowerCase().includes(query) ||
         product.subcategory.toLowerCase().includes(query);
 
-      // Matches main category selection
       const matchesCategory =
         selectedCategory === "All" ||
         product.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-      // Matches subcategory selection
       const matchesSubcategory =
         selectedSubcategory === "All" ||
         product.subcategory?.toLowerCase() === selectedSubcategory.toLowerCase();
@@ -215,7 +216,6 @@ export const Marketplace = ({
     });
   }, [effectiveProducts, searchQuery, selectedCategory, selectedSubcategory]);
 
-  // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
   const currentProducts = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -230,332 +230,326 @@ export const Marketplace = ({
   };
 
   return (
-    <section className="py-12 bg-eerie-1 min-h-screen text-white">
-      <div className="container mx-auto px-4 md:px-8">
-        
-        {/* HEADER & SEARCH BAR */}
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold uppercase tracking-[4px] text-gold-crayola">
-            Exclusive Collection
-          </span>
-          <div className="my-2 flex items-center justify-center space-x-3">
-            <DiamondSeparator />
-            <h1 className="font-forum text-4xl text-white md:text-5xl">Marketplace</h1>
-            <DiamondSeparator />
-          </div>
-          <p className="text-sm text-quicksilver max-w-lg mx-auto mb-8">
-            Explore rare, artisan-crafted pieces certified for authenticity.
-          </p>
+    <div className="container mx-auto px-4 md:px-8">
+      {/* HEADER & SEARCH BAR */}
+      <div className="text-center mb-10">
+        <span className="text-xs font-bold uppercase tracking-[4px] text-gold-crayola">
+          Exclusive Collection
+        </span>
+        <div className="my-2 flex items-center justify-center space-x-3">
+          <DiamondSeparator />
+          <h1 className="font-forum text-4xl text-white md:text-5xl">Marketplace</h1>
+          <DiamondSeparator />
+        </div>
+        <p className="text-sm text-quicksilver max-w-lg mx-auto mb-8">
+          Explore rare, artisan-crafted pieces certified for authenticity.
+        </p>
 
-          {/* Search Bar Container */}
-          <div className="relative max-w-2xl mx-auto">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Search bags, rings, watches, dresses, shirts..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full bg-eerie-2 border border-white/20 py-3.5 pl-12 pr-10 text-xs text-white placeholder-quicksilver outline-none focus:border-gold-crayola transition-all rounded-xs shadow-inner"
-              />
-              <Search className="absolute left-4 h-4 w-4 text-gold-crayola pointer-events-none" />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 cursor-pointer text-quicksilver hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+        <div className="relative max-w-2xl mx-auto">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Search shoes, bags, rings, dresses, shirts..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full bg-eerie-2 border border-white/20 py-3.5 pl-12 pr-10 text-xs text-white placeholder-quicksilver outline-none focus:border-gold-crayola transition-all rounded-xs shadow-inner"
+            />
+            <Search className="absolute left-4 h-4 w-4 text-gold-crayola pointer-events-none" />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 cursor-pointer text-quicksilver hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Mobile Filter Toggle Button */}
-        <div className="lg:hidden mb-6 flex justify-between items-center">
-          <button
-            onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-            className="cursor-pointer flex items-center space-x-2 border border-gold-crayola bg-eerie-2 px-4 py-2 text-xs text-gold-crayola uppercase tracking-widest font-bold"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            <span>Categories & Filters</span>
-          </button>
-          <span className="text-xs text-quicksilver">
-            Showing {filteredProducts.length} Results
-          </span>
-        </div>
+      <div className="lg:hidden mb-6 flex justify-between items-center">
+        <button
+          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+          className="cursor-pointer flex items-center space-x-2 border border-gold-crayola bg-eerie-2 px-4 py-2 text-xs text-gold-crayola uppercase tracking-widest font-bold"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span>Categories & Filters</span>
+        </button>
+        <span className="text-xs text-quicksilver">
+          Showing {filteredProducts.length} Results
+        </span>
+      </div>
 
-        {/* MAIN LAYOUT: SIDEBAR (30%) + PRODUCT GRID (70%) */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          
-          {/* LEFT SIDEBAR (Categories Dropdown Accordion) */}
-          <aside
-            className={`w-full lg:w-[28%] bg-smoky-3 border border-white/10 p-5 rounded-xs transition-all duration-300 ${
-              isMobileSidebarOpen ? "block" : "hidden lg:block"
-            }`}
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-              <h3 className="font-forum text-xl text-white">Categories</h3>
-              {(selectedCategory !== "All" || selectedSubcategory !== "All") && (
-                <button
-                  onClick={() => handleCategorySelect("All", "All")}
-                  className="cursor-pointer text-[10px] text-gold-crayola uppercase tracking-wider hover:underline"
-                >
-                  Clear Filters
-                </button>
-              )}
-            </div>
-
-            {/* "All Products" Option */}
-            <div className="mb-2">
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* LEFT SIDEBAR */}
+        <aside
+          className={`w-full lg:w-[28%] bg-smoky-3 border border-white/10 p-5 rounded-xs transition-all duration-300 ${
+            isMobileSidebarOpen ? "block" : "hidden lg:block"
+          }`}
+        >
+          <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+            <h3 className="font-forum text-xl text-white">Categories</h3>
+            {(selectedCategory !== "All" || selectedSubcategory !== "All") && (
               <button
                 onClick={() => handleCategorySelect("All", "All")}
-                className={`cursor-pointer w-full text-left py-2 px-3 text-xs font-bold uppercase tracking-widest transition-all rounded-xs ${
-                  selectedCategory === "All"
-                    ? "bg-gold-crayola text-eerie-1"
-                    : "text-quicksilver hover:bg-eerie-2 hover:text-white"
-                }`}
+                className="cursor-pointer text-[10px] text-gold-crayola uppercase tracking-wider hover:underline"
               >
-                All Products ({effectiveProducts.length})
+                Clear Filters
               </button>
-            </div>
+            )}
+          </div>
 
-            {/* Category Dropdown List */}
-            <div className="space-y-1">
-              {CATEGORY_TREE.map((cat) => {
-                const isExpanded = expandedCategory === cat.name;
-                const isCatSelected = selectedCategory === cat.name;
+          <div className="mb-2">
+            <button
+              onClick={() => handleCategorySelect("All", "All")}
+              className={`cursor-pointer w-full text-left py-2 px-3 text-xs font-bold uppercase tracking-widest transition-all rounded-xs ${
+                selectedCategory === "All"
+                  ? "bg-gold-crayola text-eerie-1"
+                  : "text-quicksilver hover:bg-eerie-2 hover:text-white"
+              }`}
+            >
+              All Products ({effectiveProducts.length})
+            </button>
+          </div>
 
-                return (
-                  <div key={cat.name} className="border-b border-white/5 last:border-none">
-                    {/* Category Header Dropdown */}
-                    <button
-                      onClick={() => {
-                        toggleAccordion(cat.name);
-                        handleCategorySelect(cat.name, "All");
-                      }}
-                      className={`cursor-pointer w-full flex items-center justify-between py-3 px-3 text-xs font-semibold uppercase tracking-wider transition-all ${
-                        isCatSelected
-                          ? "text-gold-crayola font-bold"
-                          : "text-white hover:text-gold-crayola"
-                      }`}
-                    >
-                      <span>{cat.name}</span>
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-gold-crayola" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-quicksilver" />
-                      )}
-                    </button>
+          <div className="space-y-1">
+            {CATEGORY_TREE.map((cat) => {
+              const isExpanded = expandedCategory === cat.name;
+              const isCatSelected = selectedCategory === cat.name;
 
-                    {/* Subcategories Collapsible Area */}
-                    {isExpanded && (
-                      <div className="pl-4 pb-3 pt-1 space-y-1 bg-eerie-1/50 rounded-xs">
+              return (
+                <div key={cat.name} className="border-b border-white/5 last:border-none">
+                  <button
+                    onClick={() => {
+                      toggleAccordion(cat.name);
+                      handleCategorySelect(cat.name, "All");
+                    }}
+                    className={`cursor-pointer w-full flex items-center justify-between py-3 px-3 text-xs font-semibold uppercase tracking-wider transition-all ${
+                      isCatSelected
+                        ? "text-gold-crayola font-bold"
+                        : "text-white hover:text-gold-crayola"
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                    {isExpanded ? (
+                      <ChevronDown className="h-4 w-4 text-gold-crayola" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-quicksilver" />
+                    )}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="pl-4 pb-3 pt-1 space-y-1 bg-eerie-1/50 rounded-xs">
+                      <button
+                        onClick={() => handleCategorySelect(cat.name, "All")}
+                        className={`cursor-pointer w-full text-left py-1.5 px-2 text-[11px] transition-colors ${
+                          isCatSelected && selectedSubcategory === "All"
+                            ? "text-gold-crayola font-bold"
+                            : "text-quicksilver hover:text-white"
+                        }`}
+                      >
+                        • All {cat.name}
+                      </button>
+                      {cat.subcategories.map((sub) => (
                         <button
-                          onClick={() => handleCategorySelect(cat.name, "All")}
+                          key={sub}
+                          onClick={() => handleCategorySelect(cat.name, sub)}
                           className={`cursor-pointer w-full text-left py-1.5 px-2 text-[11px] transition-colors ${
-                            isCatSelected && selectedSubcategory === "All"
+                            isCatSelected && selectedSubcategory === sub
                               ? "text-gold-crayola font-bold"
                               : "text-quicksilver hover:text-white"
                           }`}
                         >
-                          • All {cat.name}
+                          • {sub}
                         </button>
-                        {cat.subcategories.map((sub) => (
-                          <button
-                            key={sub}
-                            onClick={() => handleCategorySelect(cat.name, sub)}
-                            className={`cursor-pointer w-full text-left py-1.5 px-2 text-[11px] transition-colors ${
-                              isCatSelected && selectedSubcategory === sub
-                                ? "text-gold-crayola font-bold"
-                                : "text-quicksilver hover:text-white"
-                            }`}
-                          >
-                            • {sub}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </aside>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </aside>
 
-          {/* RIGHT CONTENT AREA (Product Grid + Pagination) */}
-          <main className="w-full lg:w-[72%]">
-            
-            {/* Results Status Header */}
-            <div className="mb-6 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 pb-4 text-xs text-quicksilver gap-2">
-              <div>
-                Showing <span className="text-white font-bold">{currentProducts.length}</span> of{" "}
-                <span className="text-white font-bold">{filteredProducts.length}</span> products
-                {selectedCategory !== "All" && (
-                  <span>
-                    {" "}in <span className="text-gold-crayola font-semibold">{selectedCategory}</span>
-                    {selectedSubcategory !== "All" && ` (${selectedSubcategory})`}
-                  </span>
-                )}
-              </div>
-              <div className="text-[11px] uppercase tracking-widest text-quicksilver">
-                Page {currentPage} of {totalPages}
-              </div>
+        {/* RIGHT CONTENT AREA */}
+        <main className="w-full lg:w-[72%]">
+          <div className="mb-6 flex flex-col sm:flex-row items-center justify-between border-b border-white/10 pb-4 text-xs text-quicksilver gap-2">
+            <div>
+              Showing <span className="text-white font-bold">{currentProducts.length}</span> of{" "}
+              <span className="text-white font-bold">{filteredProducts.length}</span> products
+              {selectedCategory !== "All" && (
+                <span>
+                  {" "}in <span className="text-gold-crayola font-semibold">{selectedCategory}</span>
+                  {selectedSubcategory !== "All" && ` (${selectedSubcategory})`}
+                </span>
+              )}
             </div>
+            <div className="text-[11px] uppercase tracking-widest text-quicksilver">
+              Page {currentPage} of {totalPages}
+            </div>
+          </div>
 
-            {/* Product Grid */}
-            {currentProducts.length === 0 ? (
-              <div className="py-24 text-center border border-dashed border-white/10 rounded-xs bg-smoky-3">
-                <p className="text-sm text-quicksilver">No products matched your search or category selection.</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    handleCategorySelect("All", "All");
-                  }}
-                  className="mt-4 cursor-pointer text-xs uppercase tracking-widest text-gold-crayola underline"
+          {currentProducts.length === 0 ? (
+            <div className="py-24 text-center border border-dashed border-white/10 rounded-xs bg-smoky-3">
+              <p className="text-sm text-quicksilver">No products matched your search or category selection.</p>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  handleCategorySelect("All", "All");
+                }}
+                className="mt-4 cursor-pointer text-xs uppercase tracking-widest text-gold-crayola underline"
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {currentProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group relative flex flex-col border border-white/10 bg-smoky-3 p-4 transition-all duration-300 hover:border-gold-crayola/50 hover:shadow-2xl"
                 >
-                  Reset Filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {currentProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="group relative flex flex-col border border-white/10 bg-smoky-3 p-4 transition-all duration-300 hover:border-gold-crayola/50 hover:shadow-2xl"
-                  >
-                    {/* Image Container */}
-                    <div className="relative aspect-square w-full overflow-hidden bg-eerie-4">
-                      {product.tag && (
-                        <span className="absolute top-3 left-3 z-10 bg-gold-crayola px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-eerie-1">
-                          {product.tag}
-                        </span>
-                      )}
+                  <div className="relative aspect-square w-full overflow-hidden bg-eerie-4">
+                    {product.tag && (
+                      <span className="absolute top-3 left-3 z-10 bg-gold-crayola px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-eerie-1">
+                        {product.tag}
+                      </span>
+                    )}
 
-                      <Link href={`/product/${product.id}`} className="cursor-pointer block h-full w-full">
-                        <Image
-                          src={product.image}
-                          alt={product.title}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                    <Link href={`/product/${product.id}`} className="cursor-pointer block h-full w-full">
+                      <Image
+                        src={product.image}
+                        alt={product.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </Link>
+
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-eerie-1/90 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
+                      <button
+                        onClick={() => onAddToCart && onAddToCart(product)}
+                        className="cursor-pointer flex w-full items-center justify-center space-x-2 border border-gold-crayola bg-eerie-1/90 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-crayola transition-all hover:bg-gold-crayola hover:text-eerie-1 pointer-events-auto"
+                      >
+                        <ShoppingBag className="h-4 w-4" />
+                        <span>ADD</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-1 flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-quicksilver mb-2">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-semibold text-white">{product.vendor.name}</span>
+                          {product.vendor.verified && (
+                            <CheckCircle className="h-3.5 w-3.5 text-gold-crayola" />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-1 text-amber-400">
+                          <Star className="h-3 w-3 fill-current" />
+                          <span className="text-[11px] font-bold text-white">{product.vendor.rating}</span>
+                        </div>
+                      </div>
+
+                      <Link href={`/product/${product.id}`} className="cursor-pointer block">
+                        <h3
+                          className="font-forum text-xl text-white transition-colors hover:text-gold-crayola line-clamp-2"
+                          title={product.title}
+                        >
+                          {product.title}
+                        </h3>
                       </Link>
 
-                      {/* ADD Button Overlay */}
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-eerie-1/90 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-                        <button
-                          onClick={() => onAddToCart && onAddToCart(product)}
-                          className="cursor-pointer flex w-full items-center justify-center space-x-2 border border-gold-crayola bg-eerie-1/90 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-crayola transition-all hover:bg-gold-crayola hover:text-eerie-1 pointer-events-auto"
-                        >
-                          <ShoppingBag className="h-4 w-4" />
-                          <span>ADD</span>
-                        </button>
-                      </div>
+                      <p className="mt-2 text-xs text-quicksilver line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
                     </div>
 
-                    {/* Details */}
-                    <div className="mt-4 flex flex-1 flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between text-xs text-quicksilver mb-2">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="font-semibold text-white">{product.vendor.name}</span>
-                            {product.vendor.verified && (
-                              <CheckCircle className="h-3.5 w-3.5 text-gold-crayola" />
-                            )}
-                          </div>
-                          <div className="flex items-center space-x-1 text-amber-400">
-                            <Star className="h-3 w-3 fill-current" />
-                            <span className="text-[11px] font-bold text-white">{product.vendor.rating}</span>
-                          </div>
-                        </div>
-
-                        {/* Title */}
-                        <Link href={`/product/${product.id}`} className="cursor-pointer block">
-                          <h3
-                            className="font-forum text-xl text-white transition-colors hover:text-gold-crayola line-clamp-2"
-                            title={product.title}
-                          >
-                            {product.title}
-                          </h3>
-                        </Link>
-
-                        <p className="mt-2 text-xs text-quicksilver line-clamp-2 leading-relaxed">
-                          {product.description}
-                        </p>
-                      </div>
-
-                      <div className="mt-4 flex items-baseline space-x-3 border-t border-white/5 pt-3">
-                        <span className="font-forum text-2xl font-bold text-gold-crayola">
-                          ${product.price.toFixed(2)}
+                    <div className="mt-4 flex items-baseline space-x-3 border-t border-white/5 pt-3">
+                      <span className="font-forum text-2xl font-bold text-gold-crayola">
+                        ${product.price.toFixed(2)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-quicksilver line-through">
+                          ${product.originalPrice.toFixed(2)}
                         </span>
-                        {product.originalPrice && (
-                          <span className="text-xs text-quicksilver line-through">
-                            ${product.originalPrice.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          )}
 
-            {/* PAGINATION BAR */}
-            {totalPages > 1 && (
-              <div className="mt-16 flex justify-center items-center">
-                <nav className="flex items-center space-x-1 sm:space-x-2">
-                  {/* Previous Page « */}
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm transition-colors ${
-                      currentPage === 1
-                        ? "border-white/10 text-white/20 cursor-not-allowed"
-                        : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
-                    }`}
-                    aria-label="Previous Page"
-                  >
-                    «
-                  </button>
+          {totalPages > 1 && (
+            <div className="mt-16 flex justify-center items-center">
+              <nav className="flex items-center space-x-1 sm:space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm transition-colors ${
+                    currentPage === 1
+                      ? "border-white/10 text-white/20 cursor-not-allowed"
+                      : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
+                  }`}
+                  aria-label="Previous Page"
+                >
+                  «
+                </button>
 
-                  {/* Page Numbers 1 to TotalPages */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    const isActive = page === currentPage;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm font-semibold transition-all ${
-                          isActive
-                            ? "bg-gold-crayola border-gold-crayola text-eerie-1 shadow-md scale-105"
-                            : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  const isActive = page === currentPage;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm font-semibold transition-all ${
+                        isActive
+                          ? "bg-gold-crayola border-gold-crayola text-eerie-1 shadow-md scale-105"
+                          : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
 
-                  {/* Next Page » */}
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm transition-colors ${
-                      currentPage === totalPages
-                        ? "border-white/10 text-white/20 cursor-not-allowed"
-                        : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
-                    }`}
-                    aria-label="Next Page"
-                  >
-                    »
-                  </button>
-                </nav>
-              </div>
-            )}
-          </main>
-        </div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`cursor-pointer h-10 w-10 flex items-center justify-center border text-sm transition-colors ${
+                    currentPage === totalPages
+                      ? "border-white/10 text-white/20 cursor-not-allowed"
+                      : "border-white/20 bg-eerie-2 text-white hover:border-gold-crayola hover:text-gold-crayola"
+                  }`}
+                  aria-label="Next Page"
+                >
+                  »
+                </button>
+              </nav>
+            </div>
+          )}
+        </main>
       </div>
+    </div>
+  );
+};
+
+// Main Export Wrapped in Suspense for Next.js build compatibility
+export const Marketplace = (props: MarketplaceProps) => {
+  return (
+    <section className="py-12 bg-eerie-1 min-h-screen text-white">
+      <Suspense fallback={
+        <div className="flex h-64 w-full items-center justify-center text-gold-crayola">
+          Loading Exclusive Collection...
+        </div>
+      }>
+        <MarketplaceContent {...props} />
+      </Suspense>
     </section>
   );
 };
