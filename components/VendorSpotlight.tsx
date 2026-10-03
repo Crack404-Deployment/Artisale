@@ -1,8 +1,10 @@
 // components/VendorSpotlight.tsx
 import Image from "next/image";
+import Link from "next/link";
 import { Star, CheckCircle, ArrowRight } from "lucide-react";
 import { mockVendors } from "@/data/marketplaceData";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
+import { LuxuryButton } from "./ui/LuxuryButton";
 
 export const VendorSpotlight = () => {
   return (
@@ -14,7 +16,7 @@ export const VendorSpotlight = () => {
           </span>
           <div className="my-2 flex items-center justify-center space-x-3">
             <DiamondSeparator />
-            <h2 className="font-forum text-4xl text-white md:text-5xl">Featured Atelier Vendors</h2>
+            <h2 className="font-forum text-4xl text-white md:text-5xl">Featured Artisans</h2>
             <DiamondSeparator />
           </div>
           <p className="text-sm text-quicksilver max-w-lg mx-auto">
@@ -22,7 +24,7 @@ export const VendorSpotlight = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 mb-16">
           {mockVendors.map((vendor) => (
             <div
               key={vendor.id}
@@ -58,6 +60,13 @@ export const VendorSpotlight = () => {
               </button>
             </div>
           ))}
+        </div>
+
+        {/* Browse All Artisans Luxury Button */}
+        <div className="flex justify-center">
+          <Link href="/artisanguild">
+            <LuxuryButton>Browse All Artisans</LuxuryButton>
+          </Link>
         </div>
       </div>
     </section>

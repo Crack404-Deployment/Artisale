@@ -230,7 +230,7 @@ const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-8">
+    <div className="container mx-auto px-4 md:px-8 mt-20">
       {/* HEADER & SEARCH BAR */}
       <div className="text-center mb-10">
         <span className="text-xs font-bold uppercase tracking-[4px] text-gold-crayola">
@@ -435,7 +435,7 @@ const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
                         className="cursor-pointer flex w-full items-center justify-center space-x-2 border border-gold-crayola bg-eerie-1/90 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-crayola transition-all hover:bg-gold-crayola hover:text-eerie-1 pointer-events-auto"
                       >
                         <ShoppingBag className="h-4 w-4" />
-                        <span>ADD</span>
+                        <span>ADD To Cart</span>
                       </button>
                     </div>
                   </div>

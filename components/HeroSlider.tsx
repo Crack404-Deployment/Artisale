@@ -129,7 +129,7 @@ export const HeroSlider = () => {
           </motion.div>
 
           {/* Hero Content */}
-          <div className="absolute inset-0 flex items-center justify-center text-center pt-24">
+          <div className="absolute inset-0 flex items-center justify-center text-center pt-10">
             <div className="container mx-auto px-6">
               <motion.span
                 initial={{ y: 20, opacity: 0 }}

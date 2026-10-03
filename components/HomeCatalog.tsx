@@ -68,8 +68,8 @@ export const HomeCatalog = ({}: HomeCatalogProps) => {
           </p>
         </motion.div>
 
-        {/* 2-Column Grid with 3D Perspective & Scroll Reveal */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+        {/* Responsive Grid: 1 col (mobile) -> 2 cols (tablet) -> 3 cols (desktop) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 max-w-7xl mx-auto">
           {catalogs.map((catalog, index) => (
             <motion.div
               key={index}
@@ -79,11 +79,11 @@ export const HomeCatalog = ({}: HomeCatalogProps) => {
               transition={{ 
                 duration: 0.8, 
                 ease: [0.23, 1, 0.32, 1],
-                delay: (index % 2) * 0.1 // Slight stagger for the right column
+                delay: (index % 3) * 0.15 // Staggered entry animation across 3 columns
               }}
               className="group relative h-[350px] sm:h-[400px] w-full [perspective:2000px] cursor-default"
             >
-              {/* Inner wrapper that performs the actual rotation */}
+              {/* Inner wrapper that performs the actual 3D card flip */}
               <div className="relative h-full w-full transition-all duration-[800ms] ease-[cubic-bezier(0.23,1,0.32,1)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] shadow-2xl">
                 
                 {/* 1. FRONT OF CARD (Image Only) */}
@@ -94,15 +94,14 @@ export const HomeCatalog = ({}: HomeCatalogProps) => {
                     fill
                     className="object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
-                  {/* Subtle dark gradient overlay to keep it feeling luxurious */}
+                  {/* Dark gradient overlay for luxury effect */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
                 </div>
 
                 {/* 2. BACK OF CARD (Text & Bullets) */}
-                {/* [transform:rotateY(180deg)] starts it flipped away from the user */}
                 <div className="absolute inset-0 h-full w-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-sm bg-eerie-2 border border-gold-crayola/40 p-8 flex flex-col items-center justify-center">
                   
-                  {/* Decorative corner accents for luxury feel */}
+                  {/* Decorative corner accents */}
                   <div className="absolute top-4 left-4 w-6 h-6 border-t border-l border-gold-crayola/50" />
                   <div className="absolute top-4 right-4 w-6 h-6 border-t border-r border-gold-crayola/50" />
                   <div className="absolute bottom-4 left-4 w-6 h-6 border-b border-l border-gold-crayola/50" />

@@ -163,7 +163,7 @@ export const ProductDetails = () => {
   };
 
   return (
-    <div className="py-12 bg-eerie-1 text-white relative min-h-screen">
+    <div className="py-12 bg-eerie-1 text-white relative min-h-screen mt-24">
       <div className="container mx-auto px-6">
         {/* Breadcrumb Navigation */}
         <div className="mb-8 text-xs text-quicksilver">
