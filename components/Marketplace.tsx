@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, Suspense, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,14 +8,13 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
-  ShoppingBag,
-  Star,
-  CheckCircle,
   X,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Heart
 } from "lucide-react";
 import { Product } from "@/types/marketplace";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
+import { LuxuryButton } from "./ui/LuxuryButton";
 
 interface MarketplaceProps {
   products?: Product[];
@@ -172,16 +171,31 @@ const ITEMS_PER_PAGE = 50;
 const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
   const searchParams = useSearchParams();
   const urlCategory = searchParams.get("category");
+  // 1. Grab the search parameter from the URL
+  const urlSearch = searchParams.get("search");
 
   const effectiveProducts =
     products && products.length > 4 ? products : STATIC_PRODUCTS;
 
- const [searchQuery, setSearchQuery] = useState("");
+  // 2. Initialize state with the URL parameter if it exists
+  const [searchQuery, setSearchQuery] = useState(urlSearch || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(urlCategory || "All");
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("All");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(urlCategory || null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Added Wishlist State
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+
+  // 3. Keep the local state synced if the URL search parameter changes 
+  // (e.g. searching from the header again while already on the marketplace page)
+  useEffect(() => {
+    if (urlSearch !== null) {
+      setSearchQuery(urlSearch);
+      setCurrentPage(1);
+    }
+  }, [urlSearch]);
 
   const toggleAccordion = (catName: string) => {
     setExpandedCategory((prev) => (prev === catName ? null : catName));
@@ -191,6 +205,21 @@ const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
     setCurrentPage(1); 
+  };
+
+  // Toggle wishlist item
+  const toggleWishlist = (productId: string, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigating if wrapped in links later
+    e.stopPropagation();
+    setWishlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
   };
 
   const filteredProducts = useMemo(() => {
@@ -410,52 +439,47 @@ const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
               {currentProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="group relative flex flex-col border border-white/10 bg-smoky-3 p-4 transition-all duration-300 hover:border-gold-crayola/50 hover:shadow-2xl"
+                  className="group relative flex flex-col overflow-hidden border border-white/10 bg-smoky-3 transition-all duration-300 hover:border-gold-crayola/50 hover:shadow-2xl"
                 >
                   <div className="relative aspect-square w-full overflow-hidden bg-eerie-4">
+                    
+                    {/* HEART/WISHLIST ICON */}
+                    <button
+                      onClick={(e) => toggleWishlist(product.id, e)}
+                      className="absolute top-3 right-3 z-10 p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/20 hover:bg-black/60 transition-all cursor-pointer group/wishlist"
+                      aria-label="Toggle Wishlist"
+                    >
+                      <Heart
+                        className={`w-4 h-4 transition-all duration-300 ${
+                          wishlist.has(product.id)
+                            ? "fill-red-500 text-red-500 scale-110"
+                            : "text-white group-hover/wishlist:text-red-400 group-hover/wishlist:scale-110"
+                        }`}
+                      />
+                    </button>
+
                     {product.tag && (
                       <span className="absolute top-3 left-3 z-10 bg-gold-crayola px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-eerie-1">
                         {product.tag}
                       </span>
                     )}
 
-                    <Link href={`/product/${product.id}`} className="cursor-pointer block h-full w-full">
-                      <Image
-                        src={product.image}
-                        alt={product.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    </Link>
-
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-eerie-1/90 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none">
-                      <button
-                        onClick={() => onAddToCart && onAddToCart(product)}
-                        className="cursor-pointer flex w-full items-center justify-center space-x-2 border border-gold-crayola bg-eerie-1/90 py-2.5 text-xs font-bold uppercase tracking-widest text-gold-crayola transition-all hover:bg-gold-crayola hover:text-eerie-1 pointer-events-auto"
-                      >
-                        <ShoppingBag className="h-4 w-4" />
-                        <span>ADD To Cart</span>
-                      </button>
-                    </div>
+                    <Image
+                      src={product.image}
+                      alt={product.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                   </div>
 
-                  <div className="mt-4 flex flex-1 flex-col justify-between">
+                  <div className="flex flex-1 flex-col justify-between p-5">
                     <div>
-                      <div className="flex items-center justify-between text-xs text-quicksilver mb-2">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="font-semibold text-white">{product.vendor.name}</span>
-                          {product.vendor.verified && (
-                            <CheckCircle className="h-3.5 w-3.5 text-gold-crayola" />
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-1 text-amber-400">
-                          <Star className="h-3 w-3 fill-current" />
-                          <span className="text-[11px] font-bold text-white">{product.vendor.rating}</span>
-                        </div>
-                      </div>
-
-                      <Link href={`/product/${product.id}`} className="cursor-pointer block">
+                      <span className="text-[10px] font-bold uppercase tracking-[2px] text-gold-crayola block mb-1">
+                        {product.vendor.name}
+                      </span>
+                      
+                      <Link href={`/product/${product.id}`} className="cursor-pointer block w-fit">
                         <h3
                           className="font-forum text-xl text-white transition-colors hover:text-gold-crayola line-clamp-2"
                           title={product.title}
@@ -469,15 +493,27 @@ const MarketplaceContent = ({ products, onAddToCart }: MarketplaceProps) => {
                       </p>
                     </div>
 
-                    <div className="mt-4 flex items-baseline space-x-3 border-t border-white/5 pt-3">
-                      <span className="font-forum text-2xl font-bold text-gold-crayola">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-xs text-quicksilver line-through">
-                          ${product.originalPrice.toFixed(2)}
-                        </span>
-                      )}
+                    <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-white/10 pt-4 gap-4 sm:gap-2">
+                      <div>
+                        <span className="block text-[10px] text-quicksilver uppercase tracking-wider mb-0.5">Price</span>
+                        <div className="flex items-baseline space-x-2">
+                          <span className="font-forum text-xl font-bold text-white">
+                            ${product.price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                          </span>
+                          {product.originalPrice && (
+                            <span className="text-[10px] text-quicksilver line-through">
+                              ${product.originalPrice.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <LuxuryButton
+                        onClick={() => onAddToCart && onAddToCart(product)}
+                        className="cursor-pointer flex items-center justify-center bg-gold-crayola px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-eerie-1 transition-all hover:bg-white hover:text-eerie-1 w-full sm:w-auto"
+                      >
+                        Acquire
+                      </LuxuryButton>
                     </div>
                   </div>
                 </div>

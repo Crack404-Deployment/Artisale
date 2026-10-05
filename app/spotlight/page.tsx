@@ -1,14 +1,14 @@
-// app/page.tsx
+// app/spotlight/page.tsx
 "use client";
 
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { Homepage } from "@/components/Homepage";
+import { Spotlight } from "@/components/Spotlight";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartItem, Product } from "@/types/marketplace";
 
-export default function Home() {
+export default function SpotlightPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -28,6 +28,7 @@ export default function Home() {
     setCart((prev) => prev.filter((item) => item.product.id !== id));
   };
 
+  // Add quantity update handler
   const handleUpdateQuantity = (id: string, newQuantity: number) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -41,7 +42,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-eerie-1 text-white">
       <Header cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} />
-      <Homepage />
+      <Spotlight onAddToCart={handleAddToCart} />
       <Footer />
       <CartDrawer
         isOpen={isCartOpen}

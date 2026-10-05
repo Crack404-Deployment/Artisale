@@ -1,13 +1,22 @@
 // components/Footer.tsx
+"use client";
+
 import Link from "next/link";
-import { Globe } from "lucide-react";
+import { Globe, ArrowUp } from "lucide-react";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
 import { LuxuryButton } from "./ui/LuxuryButton";
 
 export const Footer = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <footer className="border-t border-white/10 bg-eerie-3 text-quicksilver">
-      <div className="container mx-auto px-6 py-16">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-eerie-3 text-quicksilver">
+      <div className="container relative z-10 mx-auto px-6 py-16">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           
           {/* Brand Identity & Social Links Block */}
@@ -24,6 +33,12 @@ export const Footer = () => {
             <p className="text-xs leading-relaxed text-quicksilver max-w-sm">
               The premiere global multi-vendor destination for independent master artisans, fine jewelers, and luxury craft houses.
             </p>
+
+            {/* Based in Badge */}
+            <div className="inline-flex items-center space-x-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-widest text-quicksilver">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-crayola animate-pulse" />
+              <span>Shop the World Online</span>
+            </div>
 
             <div className="flex items-center space-x-3 pt-2">
               <a
@@ -99,16 +114,35 @@ export const Footer = () => {
 
         </div>
 
-        {/* Bottom Bar & Luxury Button CTA */}
+        {/* Bottom Bar & Go To Top Action */}
         <div className="mt-16 flex flex-col items-center justify-between border-t border-white/5 pt-8 text-xs gap-4 sm:flex-row">
-          <p>© {new Date().getFullYear()} Artisale Luxury Marketplace. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Artisale Luxury Marketplace. Crack404 All rights reserved.</p>
           
+          {/* Privacy Policy, Terms, and Go To Top grouped in one div */}
           <div className="flex items-center space-x-4">
             <Link href="#" className="hover:text-gold-crayola transition-colors">Privacy Policy</Link>
             <DiamondSeparator />
             <Link href="#" className="hover:text-gold-crayola transition-colors">Terms of Service</Link>
+            <DiamondSeparator />
+            <button
+              onClick={scrollToTop}
+              aria-label="Scroll to top"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-eerie-1 text-white transition-all duration-300 hover:border-gold-crayola hover:text-gold-crayola hover:scale-110 focus:outline-none focus:ring-1 focus:ring-gold-crayola"
+            >
+              <ArrowUp className="h-4 w-4" />
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Large Background Watermark Title */}
+      <div 
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[-10%] left-1/2 -z-0 w-full -translate-x-1/2 select-none text-center opacity-[0.03] leading-none"
+      >
+        <span className="font-forum text-[15vw] font-black tracking-widest text-white uppercase whitespace-nowrap block">
+          ARTISALE
+        </span>
       </div>
     </footer>
   );

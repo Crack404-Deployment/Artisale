@@ -10,11 +10,11 @@ import {
     ShieldCheck,
     Hammer,
     Star,
-    CheckCircle,
-    ArrowRight
+    CheckCircle
 } from "lucide-react";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
 import { mockVendors } from "@/data/marketplaceData";
+import { LuxuryButton } from "./ui/LuxuryButton";
 
 const guildPillars = [
     {
@@ -156,10 +156,9 @@ export const ArtisanGuild = () => {
                                 </div>
 
                                 <Link href={`/artisanshop?vendor=${vendor.id}`}>
-                                    <button className="mt-4 inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-white transition-colors group-hover:text-gold-crayola">
+                                    <LuxuryButton>
                                         <span>Visit Boutique</span>
-                                        <ArrowRight className="h-3.5 w-3.5" />
-                                    </button>
+                                    </LuxuryButton>
                                 </Link>
                             </div>
                         ))}

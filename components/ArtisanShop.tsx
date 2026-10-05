@@ -1,16 +1,23 @@
 // components/ArtisanShop.tsx
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Star, 
   CheckCircle, 
   ShoppingBag, 
   MapPin, 
-  ShieldCheck 
+  ShieldCheck,
+  Mail,
+  Phone,
+  Globe,
+  Clock,
+  X,
+  ExternalLink
 } from "lucide-react";
 import { DiamondSeparator } from "./ui/DiamondSeparator";
 import { LuxuryButton } from "./ui/LuxuryButton";
@@ -23,11 +30,33 @@ interface ArtisanShopProps {
 function ArtisanShopContent({ onAddToCart }: ArtisanShopProps) {
   const searchParams = useSearchParams();
   const vendorParam = searchParams.get("vendor");
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
+  // Prevent background scrolling when contact modal is open
+  useEffect(() => {
+    if (isContactModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isContactModalOpen]);
 
   // Find vendor matching query ID or default to first vendor
   const vendor = mockVendors.find(
     (v) => String(v.id) === String(vendorParam)
   ) || mockVendors[0];
+
+  // Dynamic contact info fallbacks
+  const vendorSlug = vendor.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const vendorEmail = (vendor as any).email || `contact@${vendorSlug}.com`;
+  const vendorPhone = (vendor as any).phone || "+39 055 234 8901";
+  const vendorWebsite = (vendor as any).website || `www.${vendorSlug}-atelier.com`;
+  const vendorLocation = (vendor as any).location || "Florence, Italy";
+  const vendorHours = (vendor as any).hours || "Mon - Fri: 09:00 - 18:00 CET";
 
   // Filter products for this vendor
   const vendorProducts = mockProducts.filter(
@@ -90,7 +119,7 @@ function ArtisanShopContent({ onAddToCart }: ArtisanShopProps) {
                 </div>
                 <div className="flex items-center space-x-1">
                   <MapPin className="h-3.5 w-3.5 text-gold-crayola" />
-                  <span>Florence, Italy</span>
+                  <span>{vendorLocation}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-gold-crayola" />
@@ -114,7 +143,10 @@ function ArtisanShopContent({ onAddToCart }: ArtisanShopProps) {
               </div>
             </div>
 
-            <LuxuryButton className="px-6 py-2 text-xs">
+            <LuxuryButton 
+              onClick={() => setIsContactModalOpen(true)}
+              className="px-6 py-2 text-xs cursor-pointer"
+            >
               Follow Atelier
             </LuxuryButton>
           </div>
@@ -163,7 +195,7 @@ function ArtisanShopContent({ onAddToCart }: ArtisanShopProps) {
             </div>
           )}
 
-          {/* Product Cards Grid — EXACT SAME CARD DESIGN AS MARKETPLACE */}
+          {/* Product Cards Grid */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product: any) => {
               const vendorData = product.vendor || {
@@ -259,6 +291,149 @@ function ArtisanShopContent({ onAddToCart }: ArtisanShopProps) {
           </div>
         </div>
       </section>
+
+      {/* ================= ATELIER CONTACT MODAL ================= */}
+      <AnimatePresence>
+        {isContactModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsContactModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="relative w-full max-w-md overflow-hidden border border-gold-crayola/40 bg-smoky-3 p-6 md:p-8 shadow-2xl z-10"
+            >
+              {/* Corner Accents */}
+              <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-gold-crayola/60" />
+              <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-gold-crayola/60" />
+              <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-gold-crayola/60" />
+              <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-gold-crayola/60" />
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsContactModalOpen(false)}
+                className="absolute top-5 right-5 text-quicksilver hover:text-gold-crayola transition-colors p-1 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              {/* Modal Header */}
+              <div className="flex items-center space-x-4 mb-6 pb-6 border-b border-white/10">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full border border-gold-crayola shrink-0">
+                  <Image
+                    src={vendor.avatar}
+                    alt={vendor.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-forum text-2xl text-white">{vendor.name}</h3>
+                    {vendor.verified && <CheckCircle className="h-4 w-4 text-gold-crayola" />}
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gold-crayola">
+                    {vendor.badge || "Master Atelier Guild"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Modal Contact Details */}
+              <div className="space-y-3.5 text-xs">
+                <p className="text-quicksilver text-xs mb-4">
+                  Direct communication channels for private allocations, bespoke orders, and concierge inquiries:
+                </p>
+
+                {/* Email */}
+                <a
+                  href={`mailto:${vendorEmail}`}
+                  className="flex items-center space-x-3 p-3 bg-eerie-1/70 border border-white/5 rounded-xs hover:border-gold-crayola/50 transition-all group"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-crayola/10 text-gold-crayola group-hover:bg-gold-crayola group-hover:text-black transition-colors">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-gold-crayola">Direct Email</span>
+                    <span className="truncate block font-mono text-white text-xs">{vendorEmail}</span>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-quicksilver group-hover:text-gold-crayola" />
+                </a>
+
+                {/* Phone */}
+                <a
+                  href={`tel:${vendorPhone.replace(/\s+/g, '')}`}
+                  className="flex items-center space-x-3 p-3 bg-eerie-1/70 border border-white/5 rounded-xs hover:border-gold-crayola/50 transition-all group"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-crayola/10 text-gold-crayola group-hover:bg-gold-crayola group-hover:text-black transition-colors">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-gold-crayola">Concierge Phone</span>
+                    <span className="font-mono text-white text-xs">{vendorPhone}</span>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-quicksilver group-hover:text-gold-crayola" />
+                </a>
+
+                {/* Website */}
+                <a
+                  href={`https://${vendorWebsite}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 p-3 bg-eerie-1/70 border border-white/5 rounded-xs hover:border-gold-crayola/50 transition-all group"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-crayola/10 text-gold-crayola group-hover:bg-gold-crayola group-hover:text-black transition-colors">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-gold-crayola">Official Website</span>
+                    <span className="truncate block font-mono text-white text-xs">{vendorWebsite}</span>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-quicksilver group-hover:text-gold-crayola" />
+                </a>
+
+                {/* Address & Hours */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="flex items-start space-x-2.5 p-3 bg-eerie-1/40 border border-white/5">
+                    <MapPin className="h-4 w-4 text-gold-crayola shrink-0 mt-0.5" />
+                    <div>
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-gold-crayola">Location</span>
+                      <span className="text-white text-[11px] leading-tight block">{vendorLocation}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-2.5 p-3 bg-eerie-1/40 border border-white/5">
+                    <Clock className="h-4 w-4 text-gold-crayola shrink-0 mt-0.5" />
+                    <div>
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-gold-crayola">Hours</span>
+                      <span className="text-white text-[11px] leading-tight block">{vendorHours}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-6 text-center">
+                <LuxuryButton
+                  onClick={() => setIsContactModalOpen(false)}
+                  className="w-full py-2.5 text-xs cursor-pointer"
+                >
+                  Close
+                </LuxuryButton>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

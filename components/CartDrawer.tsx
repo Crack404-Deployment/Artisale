@@ -1,6 +1,7 @@
 // components/CartDrawer.tsx
 "use client";
 
+import { useEffect } from "react";
 import Image from "next/image";
 import { X, Trash2, ShoppingBag, Plus, Minus } from "lucide-react";
 import { CartItem } from "@/types/marketplace";
@@ -11,7 +12,6 @@ interface CartDrawerProps {
   onClose: () => void;
   items: CartItem[];
   onRemove: (id: string) => void;
-  // Add the new prop to handle quantity changes
   onUpdateQuantity: (id: string, quantity: number) => void;
 }
 
@@ -23,6 +23,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity 
 }) => {
   const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+
+  // Prevent background scrolling when cart drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -63,7 +76,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     <h4 className="font-forum text-base text-white">{item.product.title}</h4>
                     <p className="text-xs text-gold-crayola mb-2">{item.product.vendor.name}</p>
                     
-                    {/* Added Quantity Controls */}
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center border border-white/20 rounded-xs bg-black/20">
                         <button 
@@ -89,10 +101,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         @ ${item.product.price.toFixed(2)}
                       </span>
                     </div>
-
                   </div>
                   
-                  {/* Total price for that item & Remove button */}
                   <div className="flex flex-col items-end space-y-2">
                     <button
                       onClick={() => onRemove(item.product.id)}
